@@ -31,6 +31,8 @@ export function StudentList({ classId, className }: StudentListProps) {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
 
+  const [uploading, setUploading] = useState(false);
+
   const isSupervisor = user?.role === UserRole.SUPERVISOR;
 
   const loadData = useCallback(async () => {
@@ -95,14 +97,22 @@ export function StudentList({ classId, className }: StudentListProps) {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setUploading(true);
     try {
       const res = await studentsApi.upload(classId, file);
-      const { created, skipped } = res.data.data || { created: 0, skipped: 0 };
-      addToast(`Uploaded: ${created} created, ${skipped} skipped`, 'success');
+      const { created, skipped, errors } = res.data.data || { created: 0, skipped: 0, errors: [] };
+      if (created === 0 && skipped === 0) {
+        addToast('No students found. Check column headers: "Register No" and "Name" are required.', 'error');
+      } else {
+        addToast(`Uploaded: ${created} added, ${skipped} skipped (already exist)`, 'success');
+        if (errors?.length) addToast(`${errors.length} rows had errors`, 'warning');
+      }
       loadData();
-    } catch {
-      addToast('Upload failed', 'error');
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || 'Upload failed';
+      addToast(msg, 'error');
     } finally {
+      setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -128,19 +138,25 @@ export function StudentList({ classId, className }: StudentListProps) {
         </div>
         <div className="flex items-center gap-2">
           <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleUpload} />
-          <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
-            <Upload className="w-4 h-4 mr-1" /> Upload
+          <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()} isLoading={uploading} disabled={uploading}>
+            <Upload className="w-4 h-4 mr-1" /> {uploading ? 'Uploading...' : 'Upload CSV/Excel'}
           </Button>
-          <Button size="sm" onClick={openAdd}>
-            <Plus className="w-4 h-4 mr-1" /> Add Student
-          </Button>
+          {isSupervisor && (
+            <Button size="sm" onClick={openAdd}>
+              <Plus className="w-4 h-4 mr-1" /> Add Student
+            </Button>
+          )}
         </div>
       </div>
 
       {students.length === 0 ? (
         <Card className="text-center py-8 text-gray-500">
           <FileSpreadsheet className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-          <p>No students yet. Add students or upload a file.</p>
+          <p>No students yet. {isSupervisor ? 'Add students or upload a file.' : 'Upload a CSV/Excel file.'}</p>
+          <p className="text-xs text-gray-400 mt-2">
+            CSV/Excel columns: <code className="bg-gray-100 px-1 rounded">Register No</code> and <code className="bg-gray-100 px-1 rounded">Name</code> are required.
+            Optional: <code className="bg-gray-100 px-1 rounded">Email</code>, <code className="bg-gray-100 px-1 rounded">Phone</code>
+          </p>
         </Card>
       ) : (
         <>
@@ -167,9 +183,11 @@ export function StudentList({ classId, className }: StudentListProps) {
                     <td className="px-4 py-3">{pctBadge(s.id)}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(s)} className="p-2 hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center" title="Edit">
-                          <Edit className="w-4 h-4 text-gray-500" />
-                        </button>
+                        {isSupervisor && (
+                          <button onClick={() => openEdit(s)} className="p-2 hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center" title="Edit">
+                            <Edit className="w-4 h-4 text-gray-500" />
+                          </button>
+                        )}
                         {isSupervisor && (
                           <button onClick={() => handleDelete(s)} className="p-2 hover:bg-red-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center" title="Delete">
                             <Trash2 className="w-4 h-4 text-red-500" />
@@ -196,9 +214,11 @@ export function StudentList({ classId, className }: StudentListProps) {
                   </div>
                   <div className="flex items-center gap-1 shrink-0 ml-2">
                     {pctBadge(s.id)}
-                    <button onClick={() => openEdit(s)} className="p-2 hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center">
-                      <Edit className="w-4 h-4 text-gray-500" />
-                    </button>
+                    {isSupervisor && (
+                      <button onClick={() => openEdit(s)} className="p-2 hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center">
+                        <Edit className="w-4 h-4 text-gray-500" />
+                      </button>
+                    )}
                     {isSupervisor && (
                       <button onClick={() => handleDelete(s)} className="p-2 hover:bg-red-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center">
                         <Trash2 className="w-4 h-4 text-red-500" />

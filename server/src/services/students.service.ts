@@ -8,10 +8,10 @@ import { parseStudentList } from '../utils/excelParser';
 
 export class StudentsService {
   async findAll(filters: { class_id?: string; status?: string; page?: number; limit?: number }) {
-    const { class_id, status, page = 1, limit = 20 } = filters;
+    const { class_id, status = 'active', page = 1, limit = 200 } = filters;
     const where: any = {};
     if (class_id) where.class_id = class_id;
-    if (status) where.status = status;
+    if (status !== 'all') where.status = status;
 
     const offset = (page - 1) * limit;
     const { rows, count } = await Student.findAndCountAll({
