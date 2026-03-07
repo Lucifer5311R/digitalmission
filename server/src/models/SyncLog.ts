@@ -27,15 +27,15 @@ interface SyncLogAttributes {
 interface SyncLogCreationAttributes extends Optional<SyncLogAttributes, 'id' | 'sync_status' | 'error_message' | 'synced_at' | 'created_at' | 'updated_at'> {}
 
 class SyncLog extends Model<SyncLogAttributes, SyncLogCreationAttributes> implements SyncLogAttributes {
-  public id!: string;
-  public user_id!: string;
-  public sync_type!: SyncType;
-  public pending_changes!: object;
-  public sync_status!: SyncStatus;
-  public error_message!: string | null;
-  public synced_at!: Date | null;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: string;
+  declare user_id: string;
+  declare sync_type: SyncType;
+  declare pending_changes: object;
+  declare sync_status: SyncStatus;
+  declare error_message: string | null;
+  declare synced_at: Date | null;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 SyncLog.init(
@@ -51,16 +51,16 @@ SyncLog.init(
       references: { model: 'users', key: 'id' },
     },
     sync_type: {
-      type: DataTypes.ENUM(...Object.values(SyncType)),
+      type: DataTypes.STRING(20),
       allowNull: false,
     },
     pending_changes: {
-      type: DataTypes.JSONB,
+      type: DataTypes.JSON,
       allowNull: false,
       defaultValue: {},
     },
     sync_status: {
-      type: DataTypes.ENUM(...Object.values(SyncStatus)),
+      type: DataTypes.STRING(20),
       allowNull: false,
       defaultValue: SyncStatus.PENDING,
     },

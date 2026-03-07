@@ -15,14 +15,14 @@ interface ClassAssignmentAttributes {
 interface ClassAssignmentCreationAttributes extends Optional<ClassAssignmentAttributes, 'id' | 'assigned_date' | 'is_active' | 'created_at' | 'updated_at'> {}
 
 class ClassAssignment extends Model<ClassAssignmentAttributes, ClassAssignmentCreationAttributes> implements ClassAssignmentAttributes {
-  public id!: string;
-  public trainer_id!: string;
-  public class_id!: string;
-  public assigned_date!: Date;
-  public is_active!: boolean;
-  public assigned_by!: string;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: string;
+  declare trainer_id: string;
+  declare class_id: string;
+  declare assigned_date: Date;
+  declare is_active: boolean;
+  declare assigned_by: string;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 ClassAssignment.init(

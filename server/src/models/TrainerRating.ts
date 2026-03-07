@@ -15,14 +15,14 @@ interface TrainerRatingAttributes {
 interface TrainerRatingCreationAttributes extends Optional<TrainerRatingAttributes, 'id' | 'feedback_text' | 'rated_at' | 'created_at' | 'updated_at'> {}
 
 class TrainerRating extends Model<TrainerRatingAttributes, TrainerRatingCreationAttributes> implements TrainerRatingAttributes {
-  public id!: string;
-  public trainer_id!: string;
-  public rated_by!: string;
-  public rating!: number;
-  public feedback_text!: string | null;
-  public rated_at!: Date;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: string;
+  declare trainer_id: string;
+  declare rated_by: string;
+  declare rating: number;
+  declare feedback_text: string | null;
+  declare rated_at: Date;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 TrainerRating.init(

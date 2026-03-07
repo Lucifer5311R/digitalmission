@@ -23,16 +23,16 @@ interface ClassAttributes {
 interface ClassCreationAttributes extends Optional<ClassAttributes, 'id' | 'description' | 'scheduled_time' | 'location' | 'capacity' | 'status' | 'created_at' | 'updated_at'> {}
 
 class Class extends Model<ClassAttributes, ClassCreationAttributes> implements ClassAttributes {
-  public id!: string;
-  public name!: string;
-  public description!: string | null;
-  public scheduled_time!: object | null;
-  public location!: string | null;
-  public capacity!: number | null;
-  public status!: ClassStatus;
-  public created_by!: string;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: string;
+  declare name: string;
+  declare description: string | null;
+  declare scheduled_time: object | null;
+  declare location: string | null;
+  declare capacity: number | null;
+  declare status: ClassStatus;
+  declare created_by: string;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 Class.init(
@@ -52,7 +52,7 @@ Class.init(
       allowNull: true,
     },
     scheduled_time: {
-      type: DataTypes.JSONB,
+      type: DataTypes.JSON,
       allowNull: true,
     },
     location: {
@@ -65,7 +65,7 @@ Class.init(
       validate: { min: 1 },
     },
     status: {
-      type: DataTypes.ENUM(...Object.values(ClassStatus)),
+      type: DataTypes.STRING(20),
       allowNull: false,
       defaultValue: ClassStatus.ACTIVE,
     },

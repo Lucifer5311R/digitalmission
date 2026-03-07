@@ -17,9 +17,7 @@
     "test:server": "npm run test --workspace=server",
     "test:client": "npm run test --workspace=client",
     "test": "npm run test:server && npm run test:client",
-    "db:migrate": "npm run db:migrate --workspace=server",
-    "db:seed": "npm run db:seed --workspace=server",
-    "db:reset": "npm run db:reset --workspace=server"
+    "db:seed": "cd server && npx ts-node src/seeders/seed.ts"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

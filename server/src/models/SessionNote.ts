@@ -13,12 +13,12 @@ interface SessionNoteAttributes {
 interface SessionNoteCreationAttributes extends Optional<SessionNoteAttributes, 'id' | 'created_at' | 'updated_at'> {}
 
 class SessionNote extends Model<SessionNoteAttributes, SessionNoteCreationAttributes> implements SessionNoteAttributes {
-  public id!: string;
-  public session_id!: string;
-  public note_text!: string;
-  public created_by!: string;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: string;
+  declare session_id: string;
+  declare note_text: string;
+  declare created_by: string;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 SessionNote.init(

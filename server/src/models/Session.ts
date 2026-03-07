@@ -21,15 +21,15 @@ interface SessionAttributes {
 interface SessionCreationAttributes extends Optional<SessionAttributes, 'id' | 'check_out_time' | 'duration_minutes' | 'status' | 'created_at' | 'updated_at'> {}
 
 class Session extends Model<SessionAttributes, SessionCreationAttributes> implements SessionAttributes {
-  public id!: string;
-  public trainer_id!: string;
-  public class_id!: string;
-  public check_in_time!: Date;
-  public check_out_time!: Date | null;
-  public duration_minutes!: number | null;
-  public status!: SessionStatus;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: string;
+  declare trainer_id: string;
+  declare class_id: string;
+  declare check_in_time: Date;
+  declare check_out_time: Date | null;
+  declare duration_minutes: number | null;
+  declare status: SessionStatus;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 Session.init(
@@ -63,7 +63,7 @@ Session.init(
       allowNull: true,
     },
     status: {
-      type: DataTypes.ENUM(...Object.values(SessionStatus)),
+      type: DataTypes.STRING(20),
       allowNull: false,
       defaultValue: SessionStatus.ACTIVE,
     },

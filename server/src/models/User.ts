@@ -26,15 +26,15 @@ interface UserAttributes {
 interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'status' | 'refresh_token' | 'created_at' | 'updated_at'> {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  public id!: string;
-  public name!: string;
-  public email!: string;
-  public password_hash!: string;
-  public role!: UserRole;
-  public status!: UserStatus;
-  public refresh_token!: string | null;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: string;
+  declare name: string;
+  declare email: string;
+  declare password_hash: string;
+  declare role: UserRole;
+  declare status: UserStatus;
+  declare refresh_token: string | null;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 User.init(
@@ -60,12 +60,12 @@ User.init(
       allowNull: false,
     },
     role: {
-      type: DataTypes.ENUM(...Object.values(UserRole)),
+      type: DataTypes.STRING(20),
       allowNull: false,
       defaultValue: UserRole.TRAINER,
     },
     status: {
-      type: DataTypes.ENUM(...Object.values(UserStatus)),
+      type: DataTypes.STRING(20),
       allowNull: false,
       defaultValue: UserStatus.ACTIVE,
     },

@@ -1,17 +1,13 @@
 import { Sequelize } from 'sequelize';
+import path from 'path';
 import { env } from './env';
 
-const sequelize = new Sequelize(env.db.name, env.db.user, env.db.password, {
-  host: env.db.host,
-  port: env.db.port,
-  dialect: 'postgres',
+const dbPath = path.resolve(__dirname, '../../../data/attendance.db');
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: dbPath,
   logging: env.nodeEnv === 'development' ? console.log : false,
-  pool: {
-    max: 10,
-    min: 0,
-    acquire: 30000,
-    idle: 10000,
-  },
   define: {
     timestamps: true,
     underscored: true,
