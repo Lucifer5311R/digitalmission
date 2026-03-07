@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, LogOut, User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSync } from '../../contexts/SyncContext';
 import { SyncIndicator } from '../common/SyncIndicator';
 
 interface HeaderProps {
@@ -9,6 +10,7 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth();
+  const { isOnline, syncState, pendingChanges } = useSync();
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
@@ -26,7 +28,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
-          <SyncIndicator isOnline={navigator.onLine} isSyncing={false} pendingChanges={0} />
+          <SyncIndicator isOnline={isOnline} isSyncing={syncState === 'syncing'} pendingChanges={pendingChanges} />
 
           <div className="flex items-center gap-2">
             <div className="hidden sm:block text-right">
