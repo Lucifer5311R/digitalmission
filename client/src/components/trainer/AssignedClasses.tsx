@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Clock, Users, Play, Square } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MapPin, Clock, Users, Play, Square, Eye } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { assignmentsApi, sessionsApi, notesApi } from '../../services/api';
 import { Card } from '../common/Card';
@@ -13,6 +14,7 @@ import { ClassAssignment, Session } from '../../types';
 
 export function AssignedClasses() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [assignments, setAssignments] = useState<ClassAssignment[]>([]);
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -135,7 +137,12 @@ export function AssignedClasses() {
         {assignments.map(assignment => (
           <Card key={assignment.id}>
             <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-gray-900">{assignment.class?.name}</h3>
+              <h3
+                className="font-semibold text-primary-600 cursor-pointer hover:underline"
+                onClick={() => navigate(`/trainer/classes/${assignment.class_id}`)}
+              >
+                {assignment.class?.name}
+              </h3>
               <Badge variant={assignment.class?.status === 'active' ? 'success' : 'gray'}>
                 {assignment.class?.status}
               </Badge>
@@ -163,15 +170,25 @@ export function AssignedClasses() {
                 </div>
               )}
             </div>
-            <Button
-              onClick={() => handleCheckin(assignment.class_id)}
-              isLoading={checkingIn}
-              disabled={!!activeSession}
-              className="w-full"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              {activeSession ? 'Already in session' : 'Check In'}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => navigate(`/trainer/classes/${assignment.class_id}`)}
+                className="flex-1"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                View / Attendance
+              </Button>
+              <Button
+                onClick={() => handleCheckin(assignment.class_id)}
+                isLoading={checkingIn}
+                disabled={!!activeSession}
+                className="flex-1"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                {activeSession ? 'In Session' : 'Check In'}
+              </Button>
+            </div>
           </Card>
         ))}
       </div>
