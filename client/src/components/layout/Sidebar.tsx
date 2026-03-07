@@ -10,6 +10,9 @@ import {
   FileText,
   Clock,
   X,
+  AlertTriangle,
+  ScrollText,
+  UserCircle,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -21,6 +24,7 @@ const trainerLinks = [
   { to: '/trainer', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/trainer/classes', icon: BookOpen, label: 'My Classes', end: false },
   { to: '/trainer/sessions', icon: Clock, label: 'Sessions', end: false },
+  { to: '/trainer/profile', icon: UserCircle, label: 'Profile', end: false },
 ];
 
 const supervisorLinks = [
@@ -29,6 +33,8 @@ const supervisorLinks = [
   { to: '/supervisor/classes', icon: BookOpen, label: 'Classes', end: false },
   { to: '/supervisor/schedule', icon: Calendar, label: 'Schedule', end: false },
   { to: '/supervisor/reports', icon: FileText, label: 'Reports', end: false },
+  { to: '/supervisor/attendance-alerts', icon: AlertTriangle, label: 'Attendance Alerts', end: false },
+  { to: '/supervisor/audit-log', icon: ScrollText, label: 'Audit Log', end: false },
 ];
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {

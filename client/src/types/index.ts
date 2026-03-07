@@ -9,6 +9,8 @@ export interface User {
   email: string;
   role: UserRole;
   status?: string;
+  phone?: string;
+  profile_photo?: string;
   created_at?: string;
 }
 
@@ -33,7 +35,12 @@ export interface ClassItem {
   status: 'active' | 'inactive' | 'archived';
   created_by: string;
   creator?: { id: string; name: string };
+  teacher_name?: string;
+  teacher_contact?: string;
+  cr_name?: string;
+  cr_contact?: string;
   assignments?: ClassAssignment[];
+  students?: Student[];
   created_at: string;
   updated_at: string;
 }
@@ -122,4 +129,78 @@ export interface SyncStatus {
   lastSync: string | null;
   lastSyncStatus: string | null;
   pendingChanges: number;
+}
+
+export interface Student {
+  id: string;
+  register_no: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  class_id: string;
+  status: 'active' | 'inactive';
+  class?: ClassItem;
+  created_at: string;
+}
+
+export interface StudentAttendance {
+  id: string;
+  student_id: string;
+  class_id: string;
+  session_id?: string;
+  date: string;
+  status: 'present' | 'absent' | 'late';
+  marked_by: string;
+  student?: Student;
+  marker?: User;
+  created_at: string;
+}
+
+export interface Assessment {
+  id: string;
+  class_id: string;
+  name: string;
+  max_marks: number;
+  weightage?: number;
+  created_by: string;
+  creator?: User;
+  marks?: AssessmentMark[];
+  created_at: string;
+}
+
+export interface AssessmentMark {
+  id: string;
+  assessment_id: string;
+  student_id: string;
+  marks_obtained: number;
+  remarks?: string;
+  updated_by: string;
+  student?: Student;
+  assessment?: Assessment;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AttendanceSummary {
+  student_id: string;
+  student_name: string;
+  register_no: string;
+  total_classes: number;
+  present: number;
+  absent: number;
+  late: number;
+  percentage: number;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  user_id: string;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  old_value: any;
+  new_value: any;
+  ip_address?: string;
+  user?: User;
+  created_at: string;
 }

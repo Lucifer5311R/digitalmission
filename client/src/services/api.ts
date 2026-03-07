@@ -166,4 +166,91 @@ export const syncApi = {
   getStatus: () => api.get<ApiResponse>('/sync/status'),
 };
 
+// Profile API
+export const profileApi = {
+  get: () => api.get<ApiResponse>('/profile'),
+  update: (data: { name?: string; email?: string; phone?: string; password?: string }) =>
+    api.put<ApiResponse>('/profile', data),
+  uploadPhoto: (file: File) => {
+    const formData = new FormData();
+    formData.append('photo', file);
+    return api.post<ApiResponse>('/profile/photo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
+// Students API
+export const studentsApi = {
+  getAll: (params?: { class_id?: string; status?: string; page?: number; limit?: number }) =>
+    api.get<ApiResponse>('/students', { params }),
+  getById: (id: string) => api.get<ApiResponse>(`/students/${id}`),
+  create: (data: { register_no: string; name: string; email?: string; phone?: string; class_id: string }) =>
+    api.post<ApiResponse>('/students', data),
+  update: (id: string, data: any) => api.put<ApiResponse>(`/students/${id}`, data),
+  delete: (id: string) => api.delete<ApiResponse>(`/students/${id}`),
+  upload: (classId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('class_id', classId);
+    return api.post<ApiResponse>('/students/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
+// Student Attendance API
+export const attendanceApi = {
+  mark: (data: { class_id: string; date: string; records: { student_id: string; status: string }[] }) =>
+    api.post<ApiResponse>('/attendance', data),
+  getByClassAndDate: (classId: string, date: string) =>
+    api.get<ApiResponse>('/attendance', { params: { class_id: classId, date } }),
+  getByStudent: (studentId: string, params?: { startDate?: string; endDate?: string }) =>
+    api.get<ApiResponse>(`/attendance/student/${studentId}`, { params }),
+  getSummary: (classId: string) =>
+    api.get<ApiResponse>('/attendance/summary', { params: { class_id: classId } }),
+  upload: (classId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('class_id', classId);
+    return api.post<ApiResponse>('/attendance/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
+// Assessments API
+export const assessmentsApi = {
+  getAll: (classId: string) => api.get<ApiResponse>('/assessments', { params: { class_id: classId } }),
+  getById: (id: string) => api.get<ApiResponse>(`/assessments/${id}`),
+  create: (data: { class_id: string; name: string; max_marks: number; weightage?: number }) =>
+    api.post<ApiResponse>('/assessments', data),
+  update: (id: string, data: any) => api.put<ApiResponse>(`/assessments/${id}`, data),
+  delete: (id: string) => api.delete<ApiResponse>(`/assessments/${id}`),
+};
+
+// Marks API
+export const marksApi = {
+  getByAssessment: (assessmentId: string) => api.get<ApiResponse>(`/marks/assessment/${assessmentId}`),
+  getByStudent: (studentId: string) => api.get<ApiResponse>(`/marks/student/${studentId}`),
+  bulkUpsert: (data: { assessment_id: string; marks: { student_id: string; marks_obtained: number; remarks?: string }[] }) =>
+    api.post<ApiResponse>('/marks', data),
+  update: (id: string, data: { marks_obtained: number; remarks?: string }) =>
+    api.put<ApiResponse>(`/marks/${id}`, data),
+};
+
+// Analytics API
+export const analyticsApi = {
+  getClassPerformance: (classId: string) => api.get<ApiResponse>(`/analytics/class/${classId}`),
+  getAttendanceAlerts: (threshold?: number) =>
+    api.get<ApiResponse>('/analytics/attendance-alerts', { params: { threshold } }),
+  getDashboardStats: () => api.get<ApiResponse>('/analytics/dashboard'),
+};
+
+// Audit Logs API
+export const auditLogsApi = {
+  getAll: (params?: { entity_type?: string; entity_id?: string; user_id?: string; action?: string; page?: number; limit?: number }) =>
+    api.get<ApiResponse>('/audit-logs', { params }),
+};
+
 export default api;

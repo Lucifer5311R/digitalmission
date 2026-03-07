@@ -42,11 +42,11 @@ export class ClassesService {
     return cls;
   }
 
-  async create(data: { name: string; description?: string; scheduled_time?: object; location?: string; capacity?: number; created_by: string }) {
+  async create(data: { name: string; description?: string; scheduled_time?: object; location?: string; capacity?: number; created_by: string; teacher_name?: string; teacher_contact?: string; cr_name?: string; cr_contact?: string }) {
     return Class.create(data);
   }
 
-  async update(id: string, data: Partial<{ name: string; description: string; scheduled_time: object; location: string; capacity: number; status: ClassStatus }>) {
+  async update(id: string, data: Partial<{ name: string; description: string; scheduled_time: object; location: string; capacity: number; status: ClassStatus; teacher_name: string; teacher_contact: string; cr_name: string; cr_contact: string }>) {
     const cls = await Class.findByPk(id);
     if (!cls) throw new AppError('Class not found', 404);
     await cls.update(data);

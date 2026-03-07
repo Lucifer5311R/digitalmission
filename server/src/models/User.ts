@@ -19,11 +19,13 @@ interface UserAttributes {
   role: UserRole;
   status: UserStatus;
   refresh_token: string | null;
+  phone: string | null;
+  profile_photo: string | null;
   created_at?: Date;
   updated_at?: Date;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'status' | 'refresh_token' | 'created_at' | 'updated_at'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'status' | 'refresh_token' | 'phone' | 'profile_photo' | 'created_at' | 'updated_at'> {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   declare id: string;
@@ -33,6 +35,8 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare role: UserRole;
   declare status: UserStatus;
   declare refresh_token: string | null;
+  declare phone: string | null;
+  declare profile_photo: string | null;
   declare readonly created_at: Date;
   declare readonly updated_at: Date;
 }
@@ -71,6 +75,14 @@ User.init(
     },
     refresh_token: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    phone: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    profile_photo: {
+      type: DataTypes.STRING(500),
       allowNull: true,
     },
     created_at: {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, MapPin, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Users, User as UserIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { classesApi } from '../../services/api';
 import { Card } from '../common/Card';
 import { Button } from '../common/Button';
@@ -9,15 +10,18 @@ import { Input } from '../common/Input';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import { ClassItem } from '../../types';
 
-const ClassCard = React.memo(function ClassCard({ cls, onEdit, onDelete }: {
+const ClassCard = React.memo(function ClassCard({ cls, onEdit, onDelete, onNavigate }: {
   cls: ClassItem;
   onEdit: (cls: ClassItem) => void;
   onDelete: (id: string) => void;
+  onNavigate: (id: string) => void;
 }) {
   return (
     <Card>
       <div className="flex items-start justify-between mb-2">
-        <h3 className="font-semibold">{cls.name}</h3>
+        <h3 className="font-semibold cursor-pointer text-primary-600 hover:text-primary-700" onClick={() => onNavigate(cls.id)}>
+          {cls.name}
+        </h3>
         <Badge variant={cls.status === 'active' ? 'success' : cls.status === 'archived' ? 'gray' : 'warning'}>
           {cls.status}
         </Badge>
@@ -32,6 +36,16 @@ const ClassCard = React.memo(function ClassCard({ cls, onEdit, onDelete }: {
         {cls.capacity && (
           <div className="flex items-center gap-1.5">
             <Users className="w-4 h-4" /> Capacity: {cls.capacity}
+          </div>
+        )}
+        {cls.teacher_name && (
+          <div className="flex items-center gap-1.5">
+            <UserIcon className="w-4 h-4" /> Teacher: {cls.teacher_name}
+          </div>
+        )}
+        {cls.cr_name && (
+          <div className="flex items-center gap-1.5">
+            <UserIcon className="w-4 h-4" /> CR: {cls.cr_name}
           </div>
         )}
       </div>
@@ -52,8 +66,9 @@ export function ClassesTab() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ClassItem | null>(null);
-  const [formData, setFormData] = useState({ name: '', description: '', location: '', capacity: '' });
+  const [formData, setFormData] = useState({ name: '', description: '', location: '', capacity: '', teacher_name: '', teacher_contact: '', cr_name: '', cr_contact: '' });
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => { loadClasses(); }, []);
 
@@ -70,7 +85,7 @@ export function ClassesTab() {
 
   const openCreate = () => {
     setEditing(null);
-    setFormData({ name: '', description: '', location: '', capacity: '' });
+    setFormData({ name: '', description: '', location: '', capacity: '', teacher_name: '', teacher_contact: '', cr_name: '', cr_contact: '' });
     setModalOpen(true);
   };
 
@@ -81,6 +96,10 @@ export function ClassesTab() {
       description: cls.description || '',
       location: cls.location || '',
       capacity: cls.capacity?.toString() || '',
+      teacher_name: cls.teacher_name || '',
+      teacher_contact: cls.teacher_contact || '',
+      cr_name: cls.cr_name || '',
+      cr_contact: cls.cr_contact || '',
     });
     setModalOpen(true);
   };
@@ -94,6 +113,10 @@ export function ClassesTab() {
         description: formData.description.trim() || undefined,
         location: formData.location.trim() || undefined,
         capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
+        teacher_name: formData.teacher_name.trim() || undefined,
+        teacher_contact: formData.teacher_contact.trim() || undefined,
+        cr_name: formData.cr_name.trim() || undefined,
+        cr_contact: formData.cr_contact.trim() || undefined,
       };
       if (editing) {
         await classesApi.update(editing.id, data);
@@ -133,7 +156,7 @@ export function ClassesTab() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {classes.map(cls => (
-          <ClassCard key={cls.id} cls={cls} onEdit={openEdit} onDelete={handleDelete} />
+          <ClassCard key={cls.id} cls={cls} onEdit={openEdit} onDelete={handleDelete} onNavigate={(id) => navigate(`/supervisor/classes/${id}`)} />
         ))}
       </div>
 
@@ -158,6 +181,12 @@ export function ClassesTab() {
           </div>
           <Input label="Location" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} placeholder="Room or location" />
           <Input label="Capacity" type="number" value={formData.capacity} onChange={e => setFormData({ ...formData, capacity: e.target.value })} placeholder="Max participants" />
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="Class Teacher" value={formData.teacher_name} onChange={e => setFormData({ ...formData, teacher_name: e.target.value })} placeholder="Teacher name" />
+            <Input label="Teacher Contact" value={formData.teacher_contact} onChange={e => setFormData({ ...formData, teacher_contact: e.target.value })} placeholder="Phone number" />
+            <Input label="CR Name" value={formData.cr_name} onChange={e => setFormData({ ...formData, cr_name: e.target.value })} placeholder="Class representative" />
+            <Input label="CR Contact" value={formData.cr_contact} onChange={e => setFormData({ ...formData, cr_contact: e.target.value })} placeholder="Phone number" />
+          </div>
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
             <Button onClick={handleSubmit} isLoading={submitting} disabled={!formData.name.trim()}>

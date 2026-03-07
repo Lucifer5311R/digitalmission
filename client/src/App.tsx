@@ -20,6 +20,11 @@ const TrainersTab = React.lazy(() => import('./components/supervisor/TrainersTab
 const ClassesTab = React.lazy(() => import('./components/supervisor/ClassesTab').then(m => ({ default: m.ClassesTab })));
 const ScheduleTab = React.lazy(() => import('./components/supervisor/ScheduleTab').then(m => ({ default: m.ScheduleTab })));
 const SupervisorReports = React.lazy(() => import('./components/supervisor/SupervisorReports').then(m => ({ default: m.SupervisorReports })));
+const ProfilePage = React.lazy(() => import('./components/common/ProfilePage').then(m => ({ default: m.ProfilePage })));
+const ClassDetailPage = React.lazy(() => import('./components/supervisor/ClassDetailPage').then(m => ({ default: m.ClassDetailPage })));
+const AttendanceAlertsPage = React.lazy(() => import('./components/supervisor/AttendanceAlertsPage').then(m => ({ default: m.AttendanceAlertsPage })));
+const AuditLogPage = React.lazy(() => import('./components/supervisor/AuditLogPage').then(m => ({ default: m.AuditLogPage })));
+const TrainerClassDetail = React.lazy(() => import('./components/trainer/TrainerClassDetail').then(m => ({ default: m.TrainerClassDetail })));
 
 function App() {
   return (
@@ -44,7 +49,9 @@ function App() {
             >
               <Route index element={<TrainerDashboard />} />
               <Route path="classes" element={<AssignedClasses />} />
+              <Route path="classes/:classId" element={<TrainerClassDetail />} />
               <Route path="sessions" element={<RecentActivity />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
 
             {/* Supervisor Routes */}
@@ -59,8 +66,12 @@ function App() {
               <Route index element={<SupervisorDashboard />} />
               <Route path="trainers" element={<TrainersTab />} />
               <Route path="classes" element={<ClassesTab />} />
+              <Route path="classes/:classId" element={<ClassDetailPage />} />
               <Route path="schedule" element={<ScheduleTab />} />
               <Route path="reports" element={<SupervisorReports />} />
+              <Route path="attendance-alerts" element={<AttendanceAlertsPage />} />
+              <Route path="audit-log" element={<AuditLogPage />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
 
             {/* Redirects */}

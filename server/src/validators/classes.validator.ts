@@ -6,6 +6,10 @@ export const createClassValidator = [
   body('scheduled_time').optional().isObject().withMessage('Scheduled time must be an object'),
   body('location').optional().isString().trim().isLength({ max: 200 }),
   body('capacity').optional().isInt({ min: 1 }).withMessage('Capacity must be at least 1'),
+  body('teacher_name').optional().isString().trim().isLength({ max: 100 }),
+  body('teacher_contact').optional().isString().trim().isLength({ max: 20 }),
+  body('cr_name').optional().isString().trim().isLength({ max: 100 }),
+  body('cr_contact').optional().isString().trim().isLength({ max: 20 }),
 ];
 
 export const updateClassValidator = [
@@ -16,6 +20,10 @@ export const updateClassValidator = [
   body('location').optional().isString().trim().isLength({ max: 200 }),
   body('capacity').optional().isInt({ min: 1 }),
   body('status').optional().isIn(['active', 'inactive', 'archived']),
+  body('teacher_name').optional().isString().trim().isLength({ max: 100 }),
+  body('teacher_contact').optional().isString().trim().isLength({ max: 20 }),
+  body('cr_name').optional().isString().trim().isLength({ max: 100 }),
+  body('cr_contact').optional().isString().trim().isLength({ max: 20 }),
 ];
 
 export const classIdValidator = [
