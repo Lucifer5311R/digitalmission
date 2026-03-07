@@ -19,8 +19,9 @@ export const env = {
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   },
   rateLimit: {
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
-    maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000', 10),
-    loginMax: parseInt(process.env.LOGIN_RATE_LIMIT_MAX || '50', 10),
+    // In dev: 1-minute window so rate limit resets quickly. In prod: 15 minutes.
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || (process.env.NODE_ENV === 'production' ? '900000' : '60000'), 10),
+    maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || (process.env.NODE_ENV === 'production' ? '200' : '2000'), 10),
+    loginMax: parseInt(process.env.LOGIN_RATE_LIMIT_MAX || (process.env.NODE_ENV === 'production' ? '10' : '100'), 10),
   },
 };
