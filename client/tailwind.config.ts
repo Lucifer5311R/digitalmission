@@ -28,6 +28,15 @@ const config: Config = {
       minWidth: {
         'touch': '44px',
       },
+      keyframes: {
+        'toast-in': {
+          '0%': { opacity: '0', transform: 'translateX(100%)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+      },
+      animation: {
+        'toast-in': 'toast-in 0.3s ease-out',
+      },
     },
   },
   plugins: [],

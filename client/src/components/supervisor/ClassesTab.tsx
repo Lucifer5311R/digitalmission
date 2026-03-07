@@ -9,6 +9,44 @@ import { Input } from '../common/Input';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import { ClassItem } from '../../types';
 
+const ClassCard = React.memo(function ClassCard({ cls, onEdit, onDelete }: {
+  cls: ClassItem;
+  onEdit: (cls: ClassItem) => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <Card>
+      <div className="flex items-start justify-between mb-2">
+        <h3 className="font-semibold">{cls.name}</h3>
+        <Badge variant={cls.status === 'active' ? 'success' : cls.status === 'archived' ? 'gray' : 'warning'}>
+          {cls.status}
+        </Badge>
+      </div>
+      {cls.description && <p className="text-sm text-gray-600 mb-3">{cls.description}</p>}
+      <div className="space-y-1 text-sm text-gray-500 mb-4">
+        {cls.location && (
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-4 h-4" /> {cls.location}
+          </div>
+        )}
+        {cls.capacity && (
+          <div className="flex items-center gap-1.5">
+            <Users className="w-4 h-4" /> Capacity: {cls.capacity}
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <Button variant="secondary" size="sm" className="flex-1" onClick={() => onEdit(cls)}>
+          <Edit className="w-4 h-4 mr-1" /> Edit
+        </Button>
+        <Button variant="danger" size="sm" onClick={() => onDelete(cls.id)}>
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+    </Card>
+  );
+});
+
 export function ClassesTab() {
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,35 +133,7 @@ export function ClassesTab() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {classes.map(cls => (
-          <Card key={cls.id}>
-            <div className="flex items-start justify-between mb-2">
-              <h3 className="font-semibold">{cls.name}</h3>
-              <Badge variant={cls.status === 'active' ? 'success' : cls.status === 'archived' ? 'gray' : 'warning'}>
-                {cls.status}
-              </Badge>
-            </div>
-            {cls.description && <p className="text-sm text-gray-600 mb-3">{cls.description}</p>}
-            <div className="space-y-1 text-sm text-gray-500 mb-4">
-              {cls.location && (
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4" /> {cls.location}
-                </div>
-              )}
-              {cls.capacity && (
-                <div className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4" /> Capacity: {cls.capacity}
-                </div>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Button variant="secondary" size="sm" className="flex-1" onClick={() => openEdit(cls)}>
-                <Edit className="w-4 h-4 mr-1" /> Edit
-              </Button>
-              <Button variant="danger" size="sm" onClick={() => handleDelete(cls.id)}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </Card>
+          <ClassCard key={cls.id} cls={cls} onEdit={openEdit} onDelete={handleDelete} />
         ))}
       </div>
 

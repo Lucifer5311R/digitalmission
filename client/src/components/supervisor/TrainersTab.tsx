@@ -10,6 +10,52 @@ import { StarRating } from '../common/StarRating';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import { User, TrainerStats } from '../../types';
 
+const TrainerCard = React.memo(function TrainerCard({ trainer, onRate }: {
+  trainer: any;
+  onRate: (id: string, name: string) => void;
+}) {
+  return (
+    <Card>
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <h3 className="font-semibold">{trainer.name}</h3>
+          <p className="text-sm text-gray-500">{trainer.email}</p>
+        </div>
+        <Badge variant="success">Active</Badge>
+      </div>
+
+      <div className="space-y-2 text-sm text-gray-600 mb-4">
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4" />
+          <span>{trainer.stats?.totalHours || 0} hours total</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4" />
+          <span>{trainer.stats?.totalSessions || 0} sessions</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Star className="w-4 h-4" />
+          <span>
+            {trainer.stats?.averageRating
+              ? `${trainer.stats.averageRating.toFixed(1)} / 5.0`
+              : 'No ratings yet'}
+          </span>
+        </div>
+      </div>
+
+      <Button
+        variant="secondary"
+        size="sm"
+        className="w-full"
+        onClick={() => onRate(trainer.id, trainer.name)}
+      >
+        <Star className="w-4 h-4 mr-1" />
+        Rate Trainer
+      </Button>
+    </Card>
+  );
+});
+
 export function TrainersTab() {
   const [trainers, setTrainers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,47 +131,14 @@ export function TrainersTab() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {trainers.map(trainer => (
-          <Card key={trainer.id}>
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="font-semibold">{trainer.name}</h3>
-                <p className="text-sm text-gray-500">{trainer.email}</p>
-              </div>
-              <Badge variant="success">Active</Badge>
-            </div>
-
-            <div className="space-y-2 text-sm text-gray-600 mb-4">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>{trainer.stats?.totalHours || 0} hours total</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span>{trainer.stats?.totalSessions || 0} sessions</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4" />
-                <span>
-                  {trainer.stats?.averageRating
-                    ? `${trainer.stats.averageRating.toFixed(1)} / 5.0`
-                    : 'No ratings yet'}
-                </span>
-              </div>
-            </div>
-
-            <Button
-              variant="secondary"
-              size="sm"
-              className="w-full"
-              onClick={() => {
-                setRatingTrainer({ id: trainer.id, name: trainer.name });
-                setRateModalOpen(true);
-              }}
-            >
-              <Star className="w-4 h-4 mr-1" />
-              Rate Trainer
-            </Button>
-          </Card>
+          <TrainerCard
+            key={trainer.id}
+            trainer={trainer}
+            onRate={(id, name) => {
+              setRatingTrainer({ id, name });
+              setRateModalOpen(true);
+            }}
+          />
         ))}
       </div>
 

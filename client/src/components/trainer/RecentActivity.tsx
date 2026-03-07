@@ -9,6 +9,47 @@ import { Button } from '../common/Button';
 import { formatDuration, formatDate, formatTime, formatDateTime } from '../../utils/formatters';
 import { Session, Pagination } from '../../types';
 
+const SessionCard = React.memo(function SessionCard({ session }: { session: Session }) {
+  return (
+    <Card padding="sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium">{session.class?.name || 'Unknown Class'}</h3>
+            <Badge variant={session.status === 'active' ? 'success' : 'gray'} size="sm">
+              {session.status}
+            </Badge>
+          </div>
+          <p className="text-sm text-gray-500">
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" />
+              {formatDate(session.check_in_time)}
+            </span>
+            <span className="mx-2">•</span>
+            {formatTime(session.check_in_time)}
+            {session.check_out_time && ` - ${formatTime(session.check_out_time)}`}
+          </p>
+          {session.notes && session.notes.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {session.notes.map(note => (
+                <div key={note.id} className="flex items-start gap-1.5 text-sm text-gray-600">
+                  <FileText className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                  <span>{note.note_text}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className="text-lg font-bold text-gray-900">
+            {session.duration_minutes ? formatDuration(session.duration_minutes) : '--'}
+          </p>
+        </div>
+      </div>
+    </Card>
+  );
+});
+
 export function RecentActivity() {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -47,42 +88,7 @@ export function RecentActivity() {
       ) : (
         <div className="space-y-3">
           {sessions.map(session => (
-            <Card key={session.id} padding="sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium">{session.class?.name || 'Unknown Class'}</h3>
-                    <Badge variant={session.status === 'active' ? 'success' : 'gray'} size="sm">
-                      {session.status}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    <span className="inline-flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {formatDate(session.check_in_time)}
-                    </span>
-                    <span className="mx-2">•</span>
-                    {formatTime(session.check_in_time)}
-                    {session.check_out_time && ` - ${formatTime(session.check_out_time)}`}
-                  </p>
-                  {session.notes && session.notes.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {session.notes.map(note => (
-                        <div key={note.id} className="flex items-start gap-1.5 text-sm text-gray-600">
-                          <FileText className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-                          <span>{note.note_text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-lg font-bold text-gray-900">
-                    {session.duration_minutes ? formatDuration(session.duration_minutes) : '--'}
-                  </p>
-                </div>
-              </div>
-            </Card>
+            <SessionCard key={session.id} session={session} />
           ))}
         </div>
       )}
