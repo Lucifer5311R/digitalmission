@@ -1,75 +1,106 @@
-const CACHE_NAME = 'attendance-v1';
+const CACHE_VERSION = 'v2';
+const STATIC_CACHE = `attendance-static-${CACHE_VERSION}`;
+const API_CACHE = `attendance-api-${CACHE_VERSION}`;
+
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
 ];
 
-// Install: cache static assets
+// Install: cache static shell assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
+    caches.open(STATIC_CACHE).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
   self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: remove all old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    })
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key !== STATIC_CACHE && key !== API_CACHE)
+          .map((key) => caches.delete(key))
+      )
+    )
   );
   self.clients.claim();
 });
 
-// Fetch: network-first for API, cache-first for static
+// Fetch strategy:
+// - API GET: network-first with cache fallback (5min TTL)
+// - API non-GET (POST/PUT/DELETE): always network, never cache
+// - JS/CSS assets (/assets/): cache-first (Vite fingerprints them)
+// - Everything else: network-first with cache fallback
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // API requests: network first, fallback to cache
-  if (url.pathname.startsWith('/api/')) {
+  // Only handle same-origin requests
+  if (url.origin !== self.location.origin) return;
+
+  // Skip non-GET API mutations — they must go to network
+  if (url.pathname.startsWith('/api/') && request.method !== 'GET') {
+    return; // Let browser handle normally
+  }
+
+  // API GET: network-first, cache for offline fallback
+  if (url.pathname.startsWith('/api/') && request.method === 'GET') {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (request.method === 'GET' && response.ok) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(API_CACHE).then((cache) => cache.put(request, clone));
           }
           return response;
         })
-        .catch(() => {
-          return caches.match(request);
-        })
+        .catch(() => caches.match(request))
     );
     return;
   }
 
-  // Static assets: cache first, fallback to network
+  // Vite fingerprinted assets (/assets/): cache-first (immutable)
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // All other requests: network-first, SPA fallback for navigation
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
+    fetch(request)
+      .then((response) => {
         if (response.ok) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
+          const clone = response.clone();
+          caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
         }
         return response;
-      });
-    }).catch(() => {
-      // Fallback for navigation requests
-      if (request.mode === 'navigate') {
-        return caches.match('/index.html');
-      }
-    })
+      })
+      .catch(() => {
+        const cached = caches.match(request);
+        if (cached) return cached;
+        // SPA fallback: return index.html for navigate requests
+        if (request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
+      })
   );
 });

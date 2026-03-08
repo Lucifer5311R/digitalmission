@@ -167,6 +167,7 @@ export function AttendanceMarking({ classId, className }: AttendanceMarkingProps
           <input
             type="date"
             value={date}
+            max={todayStr()}
             onChange={(e) => setDate(e.target.value)}
             className="input-field text-sm min-h-[44px] px-3"
           />

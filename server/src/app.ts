@@ -6,6 +6,7 @@ import { corsOptions } from './config/cors';
 import { generalLimiter } from './middleware/rateLimiter';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import routes from './routes';
+import { env } from './config/env';
 
 const app = express();
 
@@ -31,8 +32,17 @@ app.get('/health', (_req, res) => {
 // API routes
 app.use('/api', routes);
 
-// 404 handler
-app.use(notFoundHandler);
+// Production: serve built frontend and handle SPA routes
+if (env.nodeEnv === 'production') {
+  const clientBuildPath = path.resolve(__dirname, '../../client/dist');
+  app.use(express.static(clientBuildPath));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+} else {
+  // Development: return JSON 404 for unknown API routes
+  app.use(notFoundHandler);
+}
 
 // Error handler (must be last)
 app.use(errorHandler);

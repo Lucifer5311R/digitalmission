@@ -44,11 +44,13 @@ StudentAttendance.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'students', key: 'id' },
+      onDelete: 'CASCADE',
     },
     class_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'classes', key: 'id' },
+      onDelete: 'CASCADE',
     },
     session_id: {
       type: DataTypes.UUID,

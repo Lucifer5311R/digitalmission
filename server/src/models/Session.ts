@@ -43,11 +43,13 @@ Session.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'users', key: 'id' },
+      onDelete: 'CASCADE',
     },
     class_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'classes', key: 'id' },
+      onDelete: 'CASCADE',
     },
     check_in_time: {
       type: DataTypes.DATE,

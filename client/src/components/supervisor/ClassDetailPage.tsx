@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Users, ClipboardList, Calendar, Phone, User } from 'lucide-react';
+import { ArrowLeft, BookOpen, Users, ClipboardList, Calendar, Phone, User, Clock } from 'lucide-react';
 import { classesApi } from '../../services/api';
 import { Card } from '../common/Card';
 import { Button } from '../common/Button';
@@ -10,7 +10,14 @@ import { StudentList } from '../students/StudentList';
 import { AttendanceMarking } from '../students/AttendanceMarking';
 import { AttendanceSummaryView } from '../students/AttendanceSummaryView';
 import { AssessmentList } from '../assessments/AssessmentList';
-import { ClassItem } from '../../types';
+import { ClassItem, ClassSchedule } from '../../types';
+
+function formatSchedule(s: ClassSchedule | null | undefined): string | null {
+  if (!s || (!s.days?.length && !s.start_time)) return null;
+  const days = s.days?.join(', ') || '';
+  const time = s.start_time ? `${s.start_time}${s.end_time ? ` – ${s.end_time}` : ''}` : '';
+  return [days, time].filter(Boolean).join('  •  ');
+}
 
 type Tab = 'overview' | 'students' | 'attendance' | 'assessments';
 
@@ -77,6 +84,12 @@ export function ClassDetailPage() {
               {cls.description && <p className="text-gray-600">{cls.description}</p>}
               {cls.location && <p><span className="text-gray-500">Location:</span> {cls.location}</p>}
               {cls.capacity && <p><span className="text-gray-500">Capacity:</span> {cls.capacity}</p>}
+              {formatSchedule(cls.scheduled_time) && (
+                <div className="flex items-center gap-1.5 text-primary-700 font-medium">
+                  <Clock className="w-4 h-4" />
+                  <span>{formatSchedule(cls.scheduled_time)}</span>
+                </div>
+              )}
             </div>
           </Card>
           <Card>

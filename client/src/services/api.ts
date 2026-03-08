@@ -148,6 +148,15 @@ export const trainersApi = {
     api.get<ApiResponse>(`/trainers/${trainerId}/stats`),
 };
 
+export const usersApi = {
+  getByRole: (role: 'trainer' | 'supervisor') =>
+    api.get<ApiResponse>(`/users?role=${role}`),
+  createTrainer: (data: { name: string; email: string; password: string; phone?: string }) =>
+    api.post<ApiResponse>('/users', data),
+  delete: (id: string) =>
+    api.delete<ApiResponse>(`/users/${id}`),
+};
+
 // Reports API
 export const reportsApi = {
   getAttendance: (params?: { startDate?: string; endDate?: string; format?: string }) =>
@@ -169,7 +178,7 @@ export const syncApi = {
 // Profile API
 export const profileApi = {
   get: () => api.get<ApiResponse>('/profile'),
-  update: (data: { name?: string; email?: string; phone?: string; password?: string }) =>
+  update: (data: { name?: string; email?: string; phone?: string; password?: string; current_password?: string }) =>
     api.put<ApiResponse>('/profile', data),
   uploadPhoto: (file: File) => {
     const formData = new FormData();

@@ -18,4 +18,8 @@ export const updateProfileValidator = [
     .optional()
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters'),
+  body('current_password')
+    .if(body('password').exists().bail().isLength({ min: 1 }))
+    .notEmpty()
+    .withMessage('Current password is required to set a new password'),
 ];

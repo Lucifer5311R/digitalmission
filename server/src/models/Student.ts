@@ -62,6 +62,7 @@ Student.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'classes', key: 'id' },
+      onDelete: 'CASCADE',
     },
     status: {
       type: DataTypes.STRING(20),

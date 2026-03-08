@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   resolve: {
     alias: {
@@ -21,7 +21,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: mode !== 'production',
   },
   test: {
     globals: true,
@@ -29,4 +29,4 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     css: false,
   },
-});
+}));

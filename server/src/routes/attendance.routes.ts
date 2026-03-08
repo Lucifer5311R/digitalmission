@@ -9,6 +9,7 @@ const router = Router();
 
 router.use(authenticate);
 
+// Both trainers and supervisors can mark, upload and view attendance
 router.post('/', validate(markAttendanceValidator), (req, res, next) => attendanceController.mark(req, res, next));
 router.get('/', validate(attendanceQueryValidator), (req, res, next) => attendanceController.getByClassAndDate(req, res, next));
 router.get('/student/:id', validate(studentAttendanceValidator), (req, res, next) => attendanceController.getByStudent(req, res, next));

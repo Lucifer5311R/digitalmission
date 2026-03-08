@@ -16,6 +16,6 @@ router.get('/:id', validate(studentIdValidator), (req, res, next) => studentsCon
 router.post('/', authorize(UserRole.SUPERVISOR), validate(createStudentValidator), (req, res, next) => studentsController.create(req, res, next));
 router.put('/:id', authorize(UserRole.SUPERVISOR), validate([...studentIdValidator, ...createStudentValidator]), (req, res, next) => studentsController.update(req, res, next));
 router.delete('/:id', authorize(UserRole.SUPERVISOR), validate(studentIdValidator), (req, res, next) => studentsController.delete(req, res, next));
-router.post('/upload', uploadExcel.single('file'), (req, res, next) => studentsController.upload(req, res, next));
+router.post('/upload', authorize(UserRole.SUPERVISOR), uploadExcel.single('file'), (req, res, next) => studentsController.upload(req, res, next));
 
 export default router;

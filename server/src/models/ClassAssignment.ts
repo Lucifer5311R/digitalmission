@@ -36,11 +36,13 @@ ClassAssignment.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'users', key: 'id' },
+      onDelete: 'CASCADE',
     },
     class_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'classes', key: 'id' },
+      onDelete: 'CASCADE',
     },
     assigned_date: {
       type: DataTypes.DATEONLY,
@@ -56,6 +58,7 @@ ClassAssignment.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'users', key: 'id' },
+      onDelete: 'CASCADE',
     },
     created_at: {
       type: DataTypes.DATE,

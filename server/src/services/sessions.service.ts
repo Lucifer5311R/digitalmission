@@ -39,6 +39,11 @@ export class SessionsService {
 
     const checkOutTime = new Date();
     const durationMs = checkOutTime.getTime() - new Date(session.check_in_time).getTime();
+
+    if (durationMs < 0) {
+      throw new AppError('Checkout time cannot be before check-in time', 400);
+    }
+
     const durationMinutes = Math.round((durationMs / 60000) * 100) / 100;
 
     await session.update({

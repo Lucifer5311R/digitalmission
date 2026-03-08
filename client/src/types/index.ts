@@ -25,11 +25,17 @@ export interface LoginResponse {
   user: User;
 }
 
+export interface ClassSchedule {
+  days: string[];
+  start_time: string;
+  end_time: string;
+}
+
 export interface ClassItem {
   id: string;
   name: string;
   description: string | null;
-  scheduled_time: { day?: string; time?: string } | null;
+  scheduled_time: ClassSchedule | null;
   location: string | null;
   capacity: number | null;
   status: 'active' | 'inactive' | 'archived';

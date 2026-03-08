@@ -14,13 +14,15 @@
     "build:server": "npm run build --workspace=server",
     "build:client": "npm run build --workspace=client",
     "build": "npm run build:server && npm run build:client",
+    "start": "cross-env NODE_ENV=production node server/dist/index.js",
     "test:server": "npm run test --workspace=server",
     "test:client": "npm run test --workspace=client",
     "test": "npm run test:server && npm run test:client",
     "db:seed": "cd server && npx ts-node src/seeders/seed.ts"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0"
   },
   "engines": {
     "node": ">=18.0.0"

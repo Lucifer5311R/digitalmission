@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import marksController from '../controllers/marks.controller';
 import { authenticate } from '../middleware/auth';
+import { authorize } from '../middleware/rbac';
 import { validate } from '../middleware/validate';
 import { bulkMarksValidator, updateMarkValidator, markQueryValidator } from '../validators/marks.validator';
+import { UserRole } from '../models/User';
 
 const router = Router();
 

@@ -1,32 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, X, UserPlus } from 'lucide-react';
-import { assignmentsApi, classesApi } from '../../services/api';
+import { Plus, X, UserPlus, Clock } from 'lucide-react';
+import { assignmentsApi, classesApi, usersApi } from '../../services/api';
 import { Card } from '../common/Card';
 import { Button } from '../common/Button';
 import { Badge } from '../common/Badge';
 import { Modal } from '../common/Modal';
 import { LoadingSpinner } from '../common/LoadingSpinner';
-import { ClassAssignment, ClassItem } from '../../types';
+import { ClassAssignment, ClassItem, ClassSchedule } from '../../types';
+import { useToast } from '../../contexts/ToastContext';
+
+function formatSchedule(s: ClassSchedule | null | undefined): string | null {
+  if (!s || (!s.days?.length && !s.start_time)) return null;
+  const days = s.days?.join(', ') || '';
+  const time = s.start_time ? `${s.start_time}${s.end_time ? ` – ${s.end_time}` : ''}` : '';
+  return [days, time].filter(Boolean).join('  •  ');
+}
 
 export function ScheduleTab() {
   const [assignments, setAssignments] = useState<ClassAssignment[]>([]);
   const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [allTrainers, setAllTrainers] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedTrainer, setSelectedTrainer] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const { addToast } = useToast();
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     try {
-      const [assignRes, classesRes] = await Promise.all([
+      const [assignRes, classesRes, trainersRes] = await Promise.all([
         assignmentsApi.getAll(),
         classesApi.getAll({ status: 'active' }),
+        usersApi.getByRole('trainer'),
       ]);
       setAssignments(assignRes.data.data || []);
       setClasses(classesRes.data.data || []);
+      setAllTrainers(trainersRes.data.data || []);
     } catch (err) {
       console.error('Failed to load schedule:', err);
     } finally {
@@ -42,9 +54,10 @@ export function ScheduleTab() {
       setAssignModalOpen(false);
       setSelectedClass('');
       setSelectedTrainer('');
+      addToast('Trainer assigned successfully', 'success');
       loadData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Assignment failed');
+      addToast(err.response?.data?.error || 'Assignment failed', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -54,25 +67,23 @@ export function ScheduleTab() {
     if (!confirm('Remove this assignment?')) return;
     try {
       await assignmentsApi.delete(id);
+      addToast('Assignment removed', 'success');
       loadData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Removal failed');
+      addToast(err.response?.data?.error || 'Removal failed', 'error');
     }
   };
 
-  // Group by class
+  // Group assignments by class id
   const byClass = new Map<string, ClassAssignment[]>();
   for (const a of assignments) {
-    const key = a.class?.name || a.class_id;
-    if (!byClass.has(key)) byClass.set(key, []);
-    byClass.get(key)!.push(a);
+    if (!byClass.has(a.class_id)) byClass.set(a.class_id, []);
+    byClass.get(a.class_id)!.push(a);
   }
 
-  // Get unique trainers for assignment modal
-  const trainerMap = new Map<string, any>();
-  for (const a of assignments) {
-    if (a.trainer) trainerMap.set(a.trainer.id, a.trainer);
-  }
+  // Build class lookup
+  const classMap = new Map<string, ClassItem>();
+  for (const c of classes) classMap.set(c.id, c);
 
   if (loading) return <LoadingSpinner className="mt-20" size="lg" />;
 
@@ -86,26 +97,57 @@ export function ScheduleTab() {
         </Button>
       </div>
 
-      {Array.from(byClass.entries()).map(([className, classAssignments]) => (
-        <Card key={className}>
-          <h3 className="font-semibold text-lg mb-3">{className}</h3>
-          <div className="space-y-2">
-            {classAssignments.map(a => (
-              <div key={a.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">{a.trainer?.name}</p>
-                  <p className="text-xs text-gray-500">{a.trainer?.email}</p>
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => handleRemove(a.id)}>
-                  <X className="w-4 h-4 text-red-500" />
-                </Button>
+      {/* Classes with no assignments */}
+      {classes
+        .filter(c => !byClass.has(c.id))
+        .map(cls => (
+          <Card key={cls.id} className="opacity-70">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-semibold text-lg">{cls.name}</h3>
+                {formatSchedule(cls.scheduled_time) && (
+                  <p className="text-sm text-primary-600 flex items-center gap-1 mt-0.5">
+                    <Clock className="w-3.5 h-3.5" />{formatSchedule(cls.scheduled_time)}
+                  </p>
+                )}
               </div>
-            ))}
-          </div>
-        </Card>
-      ))}
+              <Badge variant="gray">No trainer assigned</Badge>
+            </div>
+          </Card>
+        ))}
 
-      {assignments.length === 0 && (
+      {Array.from(byClass.entries()).map(([classId, classAssignments]) => {
+        const cls = classMap.get(classId);
+        const schedule = formatSchedule(cls?.scheduled_time);
+        return (
+          <Card key={classId}>
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h3 className="font-semibold text-lg">{classAssignments[0].class?.name || cls?.name || classId}</h3>
+                {schedule && (
+                  <p className="text-sm text-primary-600 flex items-center gap-1 mt-0.5">
+                    <Clock className="w-3.5 h-3.5" />{schedule}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              {classAssignments.map(a => (
+                <div key={a.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">{a.trainer?.name}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => handleRemove(a.id)}>
+                    <X className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })}
+
+      {assignments.length === 0 && classes.length === 0 && (
         <Card className="text-center py-12">
           <p className="text-gray-500">No assignments yet. Assign trainers to classes to get started.</p>
         </Card>
@@ -135,7 +177,7 @@ export function ScheduleTab() {
               className="input-field"
             >
               <option value="">Select a trainer</option>
-              {Array.from(trainerMap.values()).map((t: any) => (
+              {allTrainers.map((t: any) => (
                 <option key={t.id} value={t.id}>{t.name}</option>
               ))}
             </select>

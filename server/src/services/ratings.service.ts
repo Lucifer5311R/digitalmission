@@ -12,6 +12,14 @@ export class RatingsService {
       throw new AppError('Trainer not found', 404);
     }
 
+    // Prevent duplicate ratings from the same supervisor
+    const existing = await TrainerRating.findOne({
+      where: { trainer_id: data.trainer_id, rated_by: data.rated_by },
+    });
+    if (existing) {
+      throw new AppError('You have already rated this trainer. Please update your existing rating instead.', 409);
+    }
+
     return TrainerRating.create(data);
   }
 

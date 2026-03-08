@@ -36,11 +36,13 @@ TrainerRating.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'users', key: 'id' },
+      onDelete: 'CASCADE',
     },
     rated_by: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'users', key: 'id' },
+      onDelete: 'CASCADE',
     },
     rating: {
       type: DataTypes.INTEGER,
@@ -74,6 +76,7 @@ TrainerRating.init(
     indexes: [
       { fields: ['trainer_id'] },
       { fields: ['rated_by'] },
+      { unique: true, fields: ['trainer_id', 'rated_by'], name: 'unique_trainer_rating_per_supervisor' },
     ],
   }
 );

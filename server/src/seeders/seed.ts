@@ -12,8 +12,9 @@ async function seed() {
     await sequelize.authenticate();
     console.log('Database connected for seeding...');
 
-    // Sync all models (force: true drops tables first)
-    await sequelize.sync({ force: true });
+    // Sync all models (force: true drops tables first - only in development)
+    const isDev = process.env.NODE_ENV !== 'production';
+    await sequelize.sync({ force: isDev });
     console.log('Tables created...');
 
     const passwordHash = await bcrypt.hash('admin123', 12);

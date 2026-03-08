@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { User } from '../models';
-import { hashPassword } from '../utils/password';
+import { hashPassword, comparePassword } from '../utils/password';
 import { AppError } from '../middleware/errorHandler';
 
 const SENSITIVE_FIELDS = ['password_hash', 'refresh_token'] as const;
@@ -17,7 +17,7 @@ export class ProfileService {
     return user;
   }
 
-  async updateProfile(userId: string, data: { name?: string; email?: string; phone?: string; password?: string }) {
+  async updateProfile(userId: string, data: { name?: string; email?: string; phone?: string; password?: string; current_password?: string }) {
     const user = await User.findByPk(userId);
     if (!user) {
       throw new AppError('User not found', 404);
@@ -27,6 +27,17 @@ export class ProfileService {
       const existing = await User.findOne({ where: { email: data.email } });
       if (existing) {
         throw new AppError('Email already in use', 409);
+      }
+    }
+
+    // Verify current password before allowing password change
+    if (data.password) {
+      if (!data.current_password) {
+        throw new AppError('Current password is required to set a new password', 400);
+      }
+      const isValid = await comparePassword(data.current_password, user.password_hash);
+      if (!isValid) {
+        throw new AppError('Current password is incorrect', 401);
       }
     }
 

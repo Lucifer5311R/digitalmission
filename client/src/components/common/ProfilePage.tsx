@@ -24,6 +24,7 @@ export function ProfilePage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -104,8 +105,12 @@ export function ProfilePage() {
     setPasswordError('');
 
     if (showPasswordSection && newPassword) {
+      if (!currentPassword) {
+        setPasswordError('Current password is required');
+        return;
+      }
       if (newPassword.length < 6) {
-        setPasswordError('Password must be at least 6 characters');
+        setPasswordError('New password must be at least 6 characters');
         return;
       }
       if (newPassword !== confirmPassword) {
@@ -116,16 +121,20 @@ export function ProfilePage() {
 
     try {
       setSaving(true);
-      const data: { name?: string; email?: string; phone?: string; password?: string } = {};
+      const data: { name?: string; email?: string; phone?: string; password?: string; current_password?: string } = {};
       if (name) data.name = name;
       if (email) data.email = email;
       data.phone = phone;
-      if (showPasswordSection && newPassword) data.password = newPassword;
+      if (showPasswordSection && newPassword) {
+        data.password = newPassword;
+        data.current_password = currentPassword;
+      }
 
       await profileApi.update(data);
       addToast('Profile updated successfully', 'success');
       setNewPassword('');
       setConfirmPassword('');
+      setCurrentPassword('');
       setShowPasswordSection(false);
     } catch {
       addToast('Failed to update profile', 'error');
@@ -251,6 +260,17 @@ export function ProfilePage() {
           {showPasswordSection && (
             <div className="mt-4 space-y-4">
               <Input
+                label="Current Password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => {
+                  setCurrentPassword(e.target.value);
+                  setPasswordError('');
+                }}
+                placeholder="Enter your current password"
+                error={passwordError && !newPassword ? passwordError : undefined}
+              />
+              <Input
                 label="New Password"
                 type="password"
                 value={newPassword}
@@ -258,8 +278,7 @@ export function ProfilePage() {
                   setNewPassword(e.target.value);
                   setPasswordError('');
                 }}
-                placeholder="Enter new password"
-                error={passwordError && !confirmPassword ? passwordError : undefined}
+                placeholder="Enter new password (min 6 chars)"
               />
               <Input
                 label="Confirm New Password"
@@ -270,7 +289,7 @@ export function ProfilePage() {
                   setPasswordError('');
                 }}
                 placeholder="Confirm new password"
-                error={passwordError}
+                error={passwordError && newPassword ? passwordError : undefined}
               />
             </div>
           )}
