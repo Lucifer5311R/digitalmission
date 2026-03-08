@@ -22,6 +22,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'dist',
     sourcemap: mode !== 'production',
+    rollupOptions: {
+      external: ['dompurify'],
+    },
   },
   test: {
     globals: true,

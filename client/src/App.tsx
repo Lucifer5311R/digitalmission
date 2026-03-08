@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { SyncProvider } from './contexts/SyncContext';
@@ -26,6 +26,28 @@ const AttendanceAlertsPage = React.lazy(() => import('./components/supervisor/At
 const AuditLogPage = React.lazy(() => import('./components/supervisor/AuditLogPage').then(m => ({ default: m.AuditLogPage })));
 const TrainerClassDetail = React.lazy(() => import('./components/trainer/TrainerClassDetail').then(m => ({ default: m.TrainerClassDetail })));
 
+function OfflineBanner() {
+  const [offline, setOffline] = useState(!navigator.onLine);
+  const [syncing, setSyncing] = useState(false);
+
+  useEffect(() => {
+    const goOffline = () => setOffline(true);
+    const goOnline = () => { setOffline(false); setSyncing(true); setTimeout(() => setSyncing(false), 3000); };
+    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline);
+    return () => { window.removeEventListener('offline', goOffline); window.removeEventListener('online', goOnline); };
+  }, []);
+
+  if (!offline && !syncing) return null;
+
+  return (
+    <div className={`fixed top-0 left-0 right-0 z-50 text-center text-sm py-1.5 font-medium ${
+      offline ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+    }`}>
+      {offline ? '⚠️ You are offline — changes will sync when reconnected' : '✅ Back online — syncing changes...'}
+    </div>
+  );
+}
 function App() {
   return (
     <ErrorBoundary>
@@ -33,6 +55,7 @@ function App() {
         <AuthProvider>
           <SyncProvider>
           <ToastProvider>
+          <OfflineBanner />
           <ToastContainer />
           <Suspense fallback={<LoadingSpinner className="mt-20" size="lg" />}>
           <Routes>
